@@ -74,6 +74,12 @@ STABLE_AUDIO_REQUIRED = ("model.safetensors", "t5gemma-b-b-ul2/model.safetensors
 
 
 def stable_audio_models() -> list[str]:
+    if remote_engine.enabled("stable_audio"):
+        return list(STABLE_AUDIO_MODELS)
+    return local_stable_audio_models()
+
+
+def local_stable_audio_models() -> list[str]:
     """Checkpoints whose download finished: a snapshot folder holding the weights and the text encoder,
     and no download from the app still running for it."""
     from . import sa3_weights  # imports this module
@@ -90,8 +96,12 @@ def stable_audio_models() -> list[str]:
     return found
 
 
-def has_stable_audio_env() -> bool:
+def has_local_stable_audio_env() -> bool:
     return (STABLE_AUDIO_DIR / ".venv").is_dir()
+
+
+def has_stable_audio_env() -> bool:
+    return remote_engine.enabled("stable_audio") or has_local_stable_audio_env()
 
 
 def has_stable_audio() -> bool:

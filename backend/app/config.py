@@ -150,11 +150,18 @@ ACE_STEP_API_PORT = int(os.getenv("ACE_STEP_API_PORT", "8001"))
 # and the orchestrator does not launch a local ACE-Step process.
 ACE_STEP_API_URL = os.getenv("ACE_STEP_API_URL", "").rstrip("/")
 ACE_STEP_API_TOKEN = os.getenv("ACE_STEP_API_TOKEN", "")
+STABLE_AUDIO_API_URL = os.getenv("STABLE_AUDIO_API_URL", "").rstrip("/")
+STABLE_AUDIO_API_TOKEN = os.getenv("STABLE_AUDIO_API_TOKEN", "")
 REMOTE_MODEL_ENDPOINTS: dict[str, RemoteModelEndpoint] = {
     "ace_step": RemoteModelEndpoint(
         label="ACE-Step",
         url=ACE_STEP_API_URL,
         token=ACE_STEP_API_TOKEN,
+    ),
+    "stable_audio": RemoteModelEndpoint(
+        label="Stable Audio 3",
+        url=STABLE_AUDIO_API_URL,
+        token=STABLE_AUDIO_API_TOKEN,
     ),
 }
 # Checkpoint folder names under ACE_STEP_DIR/checkpoints. acestep-api has no
@@ -292,9 +299,9 @@ MODELS: dict[str, ModelDefinition] = {
         id="stable_audio",
         label="Stable Audio 3",
         proxy_prefix="sa3",
-        proxy_target=f"http://127.0.0.1:{STABLE_AUDIO_API_PORT}",
-        health_url=f"http://127.0.0.1:{STABLE_AUDIO_API_PORT}/health",
-        processes=[
+        proxy_target=STABLE_AUDIO_API_URL or f"http://127.0.0.1:{STABLE_AUDIO_API_PORT}",
+        health_url=(f"{STABLE_AUDIO_API_URL}/health" if STABLE_AUDIO_API_URL else f"http://127.0.0.1:{STABLE_AUDIO_API_PORT}/health"),
+        processes=[] if STABLE_AUDIO_API_URL else [
             ProcessSpec(
                 name="stable_audio_api",
                 cwd=STABLE_AUDIO_DIR,

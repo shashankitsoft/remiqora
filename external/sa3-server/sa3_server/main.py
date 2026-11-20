@@ -4,14 +4,15 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import secrets
 import signal
 import threading
 from pathlib import Path
 from typing import Annotated, Any
 
 import uvicorn
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
 from . import __version__
@@ -37,6 +38,19 @@ class QueryRequest(BaseModel):
 
 def build_app(engine: Engine, preload: str | None) -> FastAPI:
     app = FastAPI(title="sa3-server", version=__version__)
+    api_token = os.getenv("STABLE_AUDIO_API_TOKEN", "").strip()
+    if api_token:
+        expected_auth = f"Bearer {api_token}"
+
+        @app.middleware("http")
+        async def require_bearer_token(request: Request, call_next):
+            if not secrets.compare_digest(request.headers.get("Authorization", ""), expected_auth):
+                return JSONResponse(
+                    {"detail": "invalid or missing bearer token"},
+                    status_code=401,
+                )
+            return await call_next(request)
+
     jobs = JobRegistry(engine.run)
     app.state.engine = engine
     app.state.jobs = jobs

@@ -531,6 +531,7 @@ CUDA_BIN_DIR=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.4\bin
 - `FFMPEG_BIN_DIR` — folder containing `ffmpeg.exe`/`ffprobe.exe`.
 - `CUDA_BIN_DIR` — the `bin` folder of the installed CUDA Toolkit (needs to be on PATH for `audiocpp_server.exe`). Windows only — on macOS this is left unset, since YuE2 runs on the Metal backend instead.
 - To keep the UI and backend local while sending ACE-Step requests to a remote API, set `ACE_STEP_API_URL` in `backend/.env`. See [Remote ACE-Step API](docs/remote-ace-step.md). When unset, Remiqora keeps its usual local ACE-Step behavior.
+- `STABLE_AUDIO_API_URL` and optional `STABLE_AUDIO_API_TOKEN` route Stable Audio 3 through a remote `sa3-server` without requiring its local environment or weights. See [Remote Stable Audio 3 API](docs/remote-stable-audio.md). When unset, Remiqora keeps its usual local Stable Audio behavior.
 
 ---
 

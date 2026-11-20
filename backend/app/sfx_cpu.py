@@ -85,7 +85,7 @@ class CpuSampler:
 
     def snapshot(self) -> dict:
         s = load_settings()
-        installed = set(features.stable_audio_models())
+        installed = set(features.local_stable_audio_models())
         if self.status == "running" and self._proc is not None and not self._proc.is_running:
             self.status, self.error = "error", self._proc.exit_summary()
         return {
@@ -125,7 +125,7 @@ class CpuSampler:
             raise PermissionError("samples on the CPU are switched off")
         if not features.has_stable_audio_env():
             raise FileNotFoundError("Stable Audio 3 is not installed")
-        if s.model not in features.stable_audio_models():
+        if s.model not in features.local_stable_audio_models():
             raise FileNotFoundError(f"the '{s.model}' checkpoint is not downloaded")
         self.touch()
         async with self._lock:

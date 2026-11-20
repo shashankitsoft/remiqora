@@ -11,6 +11,10 @@ uv sync
 uv run sa3-server --host 127.0.0.1 --port 8002
 ```
 
+For a publicly exposed deployment, set `STABLE_AUDIO_API_TOKEN` to require bearer
+authentication. The caller must then send `Authorization: Bearer <token>`
+with every request, including `/health`.
+
 The server reads the weights from the Hugging Face cache (`HF_HOME`) and never downloads on
 its own. `python -m sa3_server.download <model>` fetches one (`--json` prints progress events
 for Remiqora's backend, which runs it from the app's Stable Audio 3 page; `--login` reads a

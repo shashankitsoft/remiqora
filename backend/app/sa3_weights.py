@@ -116,7 +116,7 @@ async def delete(model: str, engine_running: bool) -> None:
 
 
 def snapshot() -> dict:
-    installed = set(features.stable_audio_models())
+    installed = set(features.local_stable_audio_models())
     models = []
     for name, meta in MODELS.items():
         d = _downloads.get(name)
@@ -133,7 +133,7 @@ def snapshot() -> dict:
                 "status": d.status, "done": d.done, "total": d.total or meta["bytes"], "error": d.error, "code": d.code,
             },
         })
-    return {"env": features.has_stable_audio_env(), "token": has_token(), "models": models}
+    return {"env": features.has_local_stable_audio_env(), "token": has_token(), "models": models}
 
 
 async def start(model: str) -> Download:
@@ -144,7 +144,7 @@ async def start(model: str) -> Download:
         return _downloads[model]
     if current is not None:
         raise RuntimeError(f"'{current}' is downloading; one at a time")
-    if not features.has_stable_audio_env():
+    if not features.has_local_stable_audio_env():
         raise FileNotFoundError("Stable Audio 3 is not installed")
     d = Download(model=model, total=MODELS[model]["bytes"])
     _downloads[model] = d
@@ -233,7 +233,7 @@ async def _run(d: Download) -> None:
 
 async def save_token(token: str) -> dict:
     """Checks a Hugging Face token and saves it where the downloader and the engine look for it."""
-    if not features.has_stable_audio_env():
+    if not features.has_local_stable_audio_env():
         raise FileNotFoundError("Stable Audio 3 is not installed")
     proc = await asyncio.create_subprocess_exec(
         _python(), "-m", "sa3_server.download", "--login", "--json",

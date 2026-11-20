@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import httpx
 
 from app.config import RemoteModelEndpoint
-from app import remote_engine
+from app import features, remote_engine
 
 
 class RemoteEngineTests(unittest.IsolatedAsyncioTestCase):
@@ -36,6 +36,23 @@ class RemoteEngineTests(unittest.IsolatedAsyncioTestCase):
             {"Authorization": "Bearer secret"},
         )
         self.assertEqual(remote_engine.auth_headers("other_model"), {})
+
+    def test_remote_stable_audio_does_not_require_local_installation(self) -> None:
+        remote_engine.REMOTE_MODEL_ENDPOINTS["stable_audio"] = RemoteModelEndpoint(
+            label="Stable Audio 3",
+            url="https://stable.example",
+        )
+        with patch("app.features.has_local_stable_audio_env", return_value=False), patch(
+            "app.features.local_stable_audio_models",
+            return_value=[],
+        ):
+            self.assertTrue(features.has_stable_audio_env())
+            self.assertFalse(features.has_local_stable_audio_env())
+            self.assertTrue(features.has_stable_audio())
+            self.assertEqual(
+                features.stable_audio_models(),
+                list(features.STABLE_AUDIO_MODELS),
+            )
 
     async def test_health_check_uses_configured_endpoint_and_token(self) -> None:
         response = Mock()
